@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Carte UNO - Gioco Educativo</title>
+  <style>
+    :root {
+      --bg-color: #f4f6f9;
+      --text-color: #1e293b;
+      --red: #e53935;
+      --blue: #1e88e5;
+      --green: #43a047;
+      --yellow: #fdd835;
+      --card-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      overflow: hidden;
+    }
+
+    header {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      padding: 12px 16px;
+      border-radius: 18px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .counter {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .counter span {
+      color: #0284c7;
+      font-size: 1.25rem;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-header {
+      background-color: #e2e8f0;
+      color: #334155;
+      border: none;
+      padding: 9px 13px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.1s ease, background-color 0.2s;
+    }
+
+    .btn-header.btn-essential {
+      background-color: #0284c7;
+      color: #ffffff;
+    }
+
+    .btn-header:active {
+      transform: scale(0.96);
+    }
+
+    .btn-exit-essential {
+      display: none;
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 100;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(15, 23, 42, 0.28);
+      color: #ffffff;
+      font-size: 1.3rem;
+      font-weight: 800;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+    }
+
+    .btn-exit-essential:active {
+      transform: scale(0.92);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    #gameArea {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .card-container {
+      width: 260px;
+      height: 380px;
+      perspective: 1000px;
+      margin-bottom: 22px;
+      cursor: pointer;
+      container-type: size;
+    }
+
+    .uno-card {
+      width: 100%;
+      height: 100%;
+      border-radius: 9cqw;
+      background: #ffffff;
+      padding: 4.5cqw;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .card-container:active .uno-card {
+      transform: scale(0.96);
+    }
+
+    .uno-card.pop {
+      animation: popCard 0.28s ease;
+    }
+
+    @keyframes popCard {
+      0% { transform: scale(0.88); opacity: 0.65; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 6.5cqw;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .card-inner.rosso { background-color: var(--red); }
+    .card-inner.blu { background-color: var(--blue); }
+    .card-inner.verde { background-color: var(--green); }
+    .card-inner.giallo { background-color: var(--yellow); }
+
+    .oval {
+      width: 74cqw;
+      height: 108cqw;
+      background: #ffffff;
+      border-radius: 50%;
+      transform: rotate(25deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .number-center {
+      transform: rotate(-25deg);
+      font-size: 46cqw;
+      font-weight: 900;
+      line-height: 1;
+      text-shadow: 0.04em 0.05em 0px rgba(0, 0, 0, 0.22);
+    }
+
+    .rosso .number-center { color: var(--red); }
+    .blu .number-center { color: var(--blue); }
+    .verde .number-center { color: var(--green); }
+    .giallo .number-center { color: #f59e0b; text-shadow: 0.04em 0.05em 0px rgba(0, 0, 0, 0.28); }
+
+    .corner {
+      position: absolute;
+      font-size: 13cqw;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0.06em 0.06em 0px rgba(0, 0, 0, 0.35);
+    }
+
+    .giallo .corner {
+      color: #1e293b;
+      text-shadow: none;
+    }
+
+    .corner-top {
+      top: 4cqw;
+      left: 5.5cqw;
+    }
+
+    .corner-bottom {
+      bottom: 4cqw;
+      right: 5.5cqw;
+      transform: rotate(180deg);
+    }
+
+    .color-label {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 12px 32px;
+      border-radius: 50px;
+      background: #ffffff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      margin-bottom: 10px;
+    }
+
+    .label-rosso { color: var(--red); }
+    .label-blu { color: var(--blue); }
+    .label-verde { color: var(--green); }
+    .label-giallo { color: #d97706; }
+
+    .tap-hint {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    /* MODALITÀ VISTA ESSENZIALE */
+    body.essential-mode {
+      padding: 10px;
+      justify-content: center;
+    }
+
+    body.essential-mode header,
+    body.essential-mode .color-label,
+    body.essential-mode .tap-hint {
+      display: none;
+    }
+
+    body.essential-mode .btn-exit-essential {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body.essential-mode main {
+      max-width: 100%;
+      height: 100%;
+    }
+
+    body.essential-mode .card-container {
+      margin-bottom: 0;
+      width: min(94vw, calc(96dvh * 0.68));
+      height: min(96dvh, calc(94vw / 0.68));
+    }
+
+    .finished-box {
+      text-align: center;
+      background: #ffffff;
+      padding: 36px 24px;
+      border-radius: 26px;
+      box-shadow: var(--card-shadow);
+      display: none;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .finished-box h2 {
+      font-size: 2rem;
+      color: #16a34a;
+      margin-bottom: 12px;
+    }
+
+    .finished-box p {
+      font-size: 1.25rem;
+      color: #475569;
+      margin-bottom: 24px;
+    }
+
+    .btn-restart-big {
+      width: 100%;
+      padding: 20px;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #ffffff;
+      background-color: #0f172a;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.25);
+    }
+
+    .btn-restart-big:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body>
+
+  <button class="btn-exit-essential" id="exitEssentialBtn" onclick="toggleEssentialMode(false)" aria-label="Esci da vista essenziale">✕</button>
+
+  <header>
+    <div class="counter">Rimaste: <span id="remainingCount">40</span>/40</div>
+    <div class="header-actions">
+      <button class="btn-header btn-essential" onclick="toggleEssentialMode(true)">Vista essenziale</button>
+      <button class="btn-header" id="resetBtn" onclick="confirmReset()">Ricomincia</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="gameArea">
+      <div class="card-container" onclick="drawNextCard()" role="button" aria-label="Tocca la carta per estrarre la prossima">
+        <div class="uno-card" id="cardBox">
+          <div class="card-inner rosso" id="cardInner">
+            <span class="corner corner-top" id="cornerTop">0</span>
+            <div class="oval">
+              <span class="number-center" id="centerNumber">0</span>
+            </div>
+            <span class="corner corner-bottom" id="cornerBottom">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="color-label label-rosso" id="colorLabel">ROSSO 0</div>
+      <div class="tap-hint" id="tapHint">Tocca la carta per la prossima</div>
+    </div>
+
+    <div class="finished-box" id="finishedBox">
+      <h2>Bravissimo! 🎉</h2>
+      <p>Hai trovato e messo via tutte e 40 le carte!</p>
+      <button class="btn-restart-big" onclick="initGame()">Gioca ancora</button>
+    </div>
+  </main>
+
+  <script>
+    const COLORS = [
+      { id: 'rosso', name: 'ROSSO' },
+      { id: 'blu', name: 'BLU' },
+      { id: 'verde', name: 'VERDE' },
+      { id: 'giallo', name: 'GIALLO' }
+    ];
+
+    let deck = [];
+
+    function toggleEssentialMode(enable) {
+      if (enable) {
+        document.body.classList.add('essential-mode');
+      } else {
+        document.body.classList.remove('essential-mode');
+      }
+    }
+
+    function buildDeck() {
+      const newDeck = [];
+      for (const color of COLORS) {
+        for (let num = 0; num <= 9; num++) {
+          newDeck.push({
+            colorId: color.id,
+            colorName: color.name,
+            number: num
+          });
+        }
+      }
+      for (let i = newDeck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newDeck[i], newDeck[j]] = [newDeck[j], newDeck[i]];
+      }
+      return newDeck;
+    }
+
+    function initGame() {
+      deck = buildDeck();
+      document.getElementById('gameArea').style.display = 'flex';
+      document.getElementById('finishedBox').style.display = 'none';
+      drawNextCard();
+    }
+
+    function drawNextCard() {
+      if (deck.length === 0) {
+        showFinished();
+        return;
+      }
+
+      const card = deck.pop();
+      const remaining = deck.length;
+
+      document.getElementById('remainingCount').textContent = remaining;
+
+      const cardInner = document.getElementById('cardInner');
+      cardInner.className = 'card-inner ' + card.colorId;
+
+      document.getElementById('cornerTop').textContent = card.number;
+      document.getElementById('centerNumber').textContent = card.number;
+      document.getElementById('cornerBottom').textContent = card.number;
+
+      const colorLabel = document.getElementById('colorLabel');
+      colorLabel.textContent = `${card.colorName} ${card.number}`;
+      colorLabel.className = 'color-label label-' + card.colorId;
+
+      const tapHint = document.getElementById('tapHint');
+      if (remaining === 0) {
+        tapHint.textContent = 'Ultima carta! Toccala quando hai finito';
+      } else {
+        tapHint.textContent = 'Tocca la carta per la prossima';
+      }
+
+      const cardBox = document.getElementById('cardBox');
+      cardBox.classList.remove('pop');
+      void cardBox.offsetWidth;
+      cardBox.classList.add('pop');
+    }
+
+    function showFinished() {
+      document.getElementById('gameArea').style.display = 'none';
+      document.getElementById('finishedBox').style.display = 'block';
+    }
+
+    function confirmReset() {
+      if (deck.length < 39) {
+        if (confirm('Vuoi ricominciare da capo con tutte e 40 le carte?')) {
+          initGame();
+        }
+      } else {
+        initGame();
+      }
+    }
+
+    window.onload = initGame;
+  </script>
+</body>
+</html>
